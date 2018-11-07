@@ -13,60 +13,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "lcd.h"
+#include "mart.h"
 
-unsigned int prekey = 0, msec = 0;
-
+unsigned int hour = 8, min = 0, sec = 0;
+int mode = CLOCK;
+char str[16] = {0,};
+	
 ISR(TIMER0_OVF_vect){
 	msec++;
-}
-
-unsigned int my_getkey(){
-	unsigned int key = 0, result = 0;
-	for(int i=0;i<3;i++){
-		if(i==0) PORTE = 0b11111110;
-		if(i==1) PORTE = 0b11111101;
-		if(i==2) PORTE = 0b11111011;
-		
-		_delay_us(5);
-		
-		key = (~PINE & 0xf0);
-		if(key){
-			result = key | (PORTE & 0x0f);
-			if(result != prekey){
-				prekey = result;
-				return result;
-			}
-			else return 0;
-		}
-	}
-	prekey = 0;
-	return 0;
-}
-
-void initSystem(){
-	DDRA = 0xff;  // 0,1 = motor, 5,6,7 = LED
-	DDRD = 0x0f;  // 0,1,2,3 = Row, 4,5,6,7 = col
-	DDRF = 0x01;  // photo
-	lcd_init();
-	lcd_clear();
 	
-	lcd_putsf(0,0, (unsigned char*)"    MARKET     ");
-	lcd_putsf(0,1, (unsigned char*)"    SYSTEM     ");
-	PORTA = 0x00;
-	_delay_ms(500);
-	
-	lcd_clear();
-	PORTA = 0b11100000;
-	_delay_ms(500);
-	
-	lcd_putsf(0,0, (unsigned char*)"    MARKET     ");
-	lcd_putsf(0,1, (unsigned char*)"    SYSTEM     ");
-	PORTA = 0x00;
-	_delay_ms(500);
-	
-	lcd_clear();
-	PORTA = 0b11100000;
-	_delay_ms(500);	
+	if(hour >= 24) hour = min = sec = msec = 0;
+	if(min >= 60){hour++; min = 0;}
+	if(sec >= 60){min++; sec = 0;}
+	if(msec >= 1000){sec++; msec = 0;}
 }
 
 int main(void)
@@ -76,11 +35,24 @@ int main(void)
 	TIMSK = 0x01;  // 0b00000001, timer 0 enable
 	TCCR0 = 0b00000100;  // 0b00000100, 분주비 = 64
 	sei();  // 숫자를 카운트
+	
 	initSystem();
+	
+
 	
     while (1) 
     {
-		
+		if(mode == CLOCK){
+			while(1){
+				unsigned int key = my_getkey();
+				//if(key)
+				lcd_putsf(0,0,(unsigned char*)"    WELCOME!!   ");
+				
+				sprintf(str,"  %d    ",key);
+				//sprintf(str,"    %02d:%02d:%02d    ",hour, min, sec);
+				lcd_putsf(0,1,(unsigned char*)str);
+			}
+		}
     }
 }
 
