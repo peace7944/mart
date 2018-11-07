@@ -79,7 +79,7 @@ void initSystem(){
 	
 	DDRA = 0xff;  // 0,1 = motor, 5,6,7 = LED
 	DDRD = 0x0f;  // 0,1,2,3 = Row, 4,5,6,7 = col
-	DDRF = 0x01;  // photo
+	DDRF = 0x00;  // photo 0
 	
 	PORTD = 0xff;
 	

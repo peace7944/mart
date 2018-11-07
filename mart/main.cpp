@@ -15,19 +15,26 @@
 #include "lcd.h"
 #include "mart.h"
 
-unsigned int hour = 8, min = 0, sec = 0;
+unsigned int hour = 8, min = 0, sec = 0, end_time = 0;
 int mode = CLOCK;
-bool error_flag = false, change_flag = false, total_flag = true;
+bool error_flag = false, change_flag = false, total_flag = true, endtime_flag = false, end_flag = false;
 long int sum = 0, total_sum = 0, total_sale = 0;
 char str[16] = {0,};
 	
 ISR(TIMER0_OVF_vect){
 	msec++;
+	if(endtime_flag) end_time++;
 	
 	if(hour >= 24) hour = min = sec = msec = 0;
 	if(min >= 60){hour++; min = 0;}
 	if(sec >= 60){min++; sec = 0;}
 	if(msec >= 1000){sec++; msec = 0;}
+		
+	if(end_time >= 5000){
+		end_flag = true;
+		endtime_flag = false;
+		end_time = 0;
+	}
 }
 
 void key_input(unsigned int key){
@@ -63,6 +70,13 @@ int main(void)
 					lcd_clear();
 					break;
 				}
+				
+				if(PINF == 0x01){
+					mode = CALCUL;
+					lcd_clear();
+					break;					
+				}
+				
 				lcd_putsf(0,0,(unsigned char*)"    WELCOME!!   ");
 				sprintf(str,"    %02d:%02d:%02d    ",hour, min, sec);
 				lcd_putsf(0,1,(unsigned char*)str);
@@ -134,7 +148,8 @@ int main(void)
 						lcd_clear();
 						_delay_ms(100);
 					}
-					total_sum = sum = 0;
+					total_sum = 0;
+					sum = 0;
 					error_flag = false;
 					mode = CLOCK;
 					break;
@@ -155,9 +170,10 @@ int main(void)
 				if(key == sw8){
 					if(total_sum > sum) error_flag = true;
 					else{
-						total_sale += sum;
+						total_sale += total_sum;
 						sum = sum - total_sum;
 						total_sum = 0;
+						endtime_flag = true;
 						lcd_clear();
 					}
 				}
@@ -174,6 +190,15 @@ int main(void)
 					error_flag = false;
 				}				
 				
+				if(key == sw15 || end_flag){
+					mode = CLOCK;
+					end_time = 0;
+					sum = 0;
+					endtime_flag = false;
+					end_flag = false;
+					break;
+				}
+				
 				sprintf(str,"    %ld",sum);
 				lcd_putsf(0,1,(unsigned char*)str);
 				
@@ -181,11 +206,20 @@ int main(void)
 		}
 
 		else if(mode == TOTAL){
+			endtime_flag = true;
+			lcd_clear();
 			while(1){
-				//unsigned int key = my_getkey();
+				unsigned int key = my_getkey();
+				
+				if(key == sw15 || end_flag){
+					mode = CLOCK;
+					end_time = 0;
+					endtime_flag = end_flag = false;
+					break;
+				}
 				
 				lcd_putsf(0,0,(unsigned char*)"Total Sales     ");
-				sprintf(str,"= %ldwon",total_sale);
+				sprintf(str,"= %ld won",total_sale);
 				lcd_putsf(0,1,(unsigned char*)str);
 			}
 		}		
