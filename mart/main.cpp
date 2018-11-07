@@ -43,6 +43,31 @@ unsigned int my_getkey(){
 	return 0;
 }
 
+void initSystem(){
+	DDRA = 0xff;  // 0,1 = motor, 5,6,7 = LED
+	DDRD = 0x0f;  // 0,1,2,3 = Row, 4,5,6,7 = col
+	DDRF = 0x01;  // photo
+	lcd_init();
+	lcd_clear();
+	
+	lcd_putsf(0,0, (unsigned char*)"    MARKET     ");
+	lcd_putsf(0,1, (unsigned char*)"    SYSTEM     ");
+	PORTA = 0x00;
+	_delay_ms(500);
+	
+	lcd_clear();
+	PORTA = 0b11100000;
+	_delay_ms(500);
+	
+	lcd_putsf(0,0, (unsigned char*)"    MARKET     ");
+	lcd_putsf(0,1, (unsigned char*)"    SYSTEM     ");
+	PORTA = 0x00;
+	_delay_ms(500);
+	
+	lcd_clear();
+	PORTA = 0b11100000;
+	_delay_ms(500);	
+}
 
 int main(void)
 {
@@ -50,7 +75,8 @@ int main(void)
 	TCNT0 = 6;  // TCNT0가 256이 될때 overflow -> 0  1/16mHz = 0.0000000625, 0.0000000625 * 64 = 0.000004 분주한 속도
 	TIMSK = 0x01;  // 0b00000001, timer 0 enable
 	TCCR0 = 0b00000100;  // 0b00000100, 분주비 = 64
-	sei();  // 숫자를 카운트	
+	sei();  // 숫자를 카운트
+	initSystem();
 	
     while (1) 
     {
