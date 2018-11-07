@@ -45,14 +45,50 @@ int main(void)
 		if(mode == CLOCK){
 			while(1){
 				unsigned int key = my_getkey();
-				//if(key)
+				if(key == sw12){
+					mode = MENU;
+					break;
+				}
 				lcd_putsf(0,0,(unsigned char*)"    WELCOME!!   ");
-				
-				sprintf(str,"  %d    ",key);
-				//sprintf(str,"    %02d:%02d:%02d    ",hour, min, sec);
+				sprintf(str,"    %02d:%02d:%02d    ",hour, min, sec);
 				lcd_putsf(0,1,(unsigned char*)str);
 			}
 		}
+		
+		else if(mode == MENU){
+			while(1){
+				unsigned int key = my_getkey();
+				
+				if(key == sw1){
+					mode = CALCUL;
+					break;
+				}
+				
+				if(key == sw2){
+					mode = TOTAL;
+					break;
+				}
+				
+				lcd_putsf(0,0,(unsigned char*)"1: Calculation  ");
+				lcd_putsf(0,1,(unsigned char*)"2: Total Sales  ");
+			}
+		}
+		
+		else if(mode == CALCUL){
+			while(1){
+				unsigned int key = my_getkey();
+				
+				lcd_putsf(0,0,(unsigned char*)"Calculate Mode  ");
+			}
+		}
+
+		else if(mode == TOTAL){
+			while(1){
+				unsigned int key = my_getkey();
+				
+				lcd_putsf(0,0,(unsigned char*)"Total Sales     ");
+			}
+		}		
     }
 }
 

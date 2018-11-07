@@ -19,6 +19,7 @@
 #define MENU 1
 #define CALCUL 2
 #define CHANGE 3
+#define TOTAL 4
 
 #define sw1 30
 #define sw2 46
