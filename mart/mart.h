@@ -39,7 +39,6 @@
 
 unsigned int prekey = 0, msec = 0;
 
-/*
 unsigned int my_getkey(){  // flag 처리
 	unsigned int key = 0, result = 0;
 	for(int i=0;i<4;i++){
@@ -59,8 +58,8 @@ unsigned int my_getkey(){  // flag 처리
 	prekey = 0;
 	return 0;
 }
-*/
 
+/*
 unsigned int my_getkey(){
 	unsigned int key = 0, result = 0;
 	for(int i=0;i<4;i++){
@@ -75,7 +74,7 @@ unsigned int my_getkey(){
 	}
 	return 0;
 }
-
+*/
 void initSystem(){
 	
 	DDRA = 0xff;  // 0,1 = motor, 5,6,7 = LED

@@ -17,6 +17,8 @@
 
 unsigned int hour = 8, min = 0, sec = 0;
 int mode = CLOCK;
+bool error_flag = false, change_flag = false, total_flag = true;
+long int sum = 0, total_sum = 0, total_sale = 0;
 char str[16] = {0,};
 	
 ISR(TIMER0_OVF_vect){
@@ -26,6 +28,19 @@ ISR(TIMER0_OVF_vect){
 	if(min >= 60){hour++; min = 0;}
 	if(sec >= 60){min++; sec = 0;}
 	if(msec >= 1000){sec++; msec = 0;}
+}
+
+void key_input(unsigned int key){
+	if(key == sw1) sum = sum * 10 + 1;
+	if(key == sw2) sum = sum * 10 + 2;
+	if(key == sw3) sum = sum * 10 + 3;
+	if(key == sw5) sum = sum * 10 + 4;
+	if(key == sw6) sum = sum * 10 + 5;
+	if(key == sw7) sum = sum * 10 + 6;
+	if(key == sw9) sum = sum * 10 + 7;
+	if(key == sw10) sum = sum * 10 + 8;
+	if(key == sw11) sum = sum * 10 + 9;
+	if(key == sw13) sum = sum * 10 + 0;	
 }
 
 int main(void)
@@ -38,8 +53,6 @@ int main(void)
 	
 	initSystem();
 	
-
-	
     while (1) 
     {
 		if(mode == CLOCK){
@@ -47,6 +60,7 @@ int main(void)
 				unsigned int key = my_getkey();
 				if(key == sw12){
 					mode = MENU;
+					lcd_clear();
 					break;
 				}
 				lcd_putsf(0,0,(unsigned char*)"    WELCOME!!   ");
@@ -61,11 +75,13 @@ int main(void)
 				
 				if(key == sw1){
 					mode = CALCUL;
+					lcd_clear();
 					break;
 				}
 				
 				if(key == sw2){
 					mode = TOTAL;
+					lcd_clear();
 					break;
 				}
 				
@@ -79,14 +95,98 @@ int main(void)
 				unsigned int key = my_getkey();
 				
 				lcd_putsf(0,0,(unsigned char*)"Calculate Mode  ");
+				
+				key_input(key);
+					
+				if(key == sw4){ // +
+					if(sum > 200000) error_flag = true;
+					else{
+						total_sum += sum;
+						sum = 0;
+						lcd_clear();
+					}
+				}
+				
+				if(key == sw8){
+					if(total_sum > 200000) error_flag = true;
+					else{
+						total_sum += sum;
+						sum = 0;
+						lcd_clear();
+						change_flag = true;
+						total_flag = false;
+					}
+				}
+				
+				if(change_flag && key == sw14){
+					mode = CHANGE;
+					lcd_clear();
+					total_flag = true;
+					change_flag = false;
+					break;
+				}
+
+				if(error_flag){
+					for(int i=0;i<3;i++){
+						sprintf(str,"     ERROR!     ");
+						lcd_putsf(0,1,(unsigned char*)str);
+						_delay_ms(100);
+						lcd_clear();
+						_delay_ms(100);
+					}
+					total_sum = sum = 0;
+					error_flag = false;
+					mode = CLOCK;
+					break;
+				}
+
+				if(total_flag) sprintf(str,"    %ld",sum);
+				else sprintf(str,"= %ld won",total_sum);
+				lcd_putsf(0,1,(unsigned char*)str);
+			}
+		}
+
+		else if(mode == CHANGE){
+			while(1){
+				unsigned int key = my_getkey();
+				lcd_putsf(0,0,(unsigned char*)"Changes Mode    ");
+				key_input(key);
+
+				if(key == sw8){
+					if(total_sum > sum) error_flag = true;
+					else{
+						total_sale += sum;
+						sum = sum - total_sum;
+						total_sum = 0;
+						lcd_clear();
+					}
+				}
+				
+				if(error_flag){
+					for(int i=0;i<3;i++){
+						sprintf(str,"     ERROR!     ");
+						lcd_putsf(0,1,(unsigned char*)str);
+						_delay_ms(100);
+						lcd_clear();
+						_delay_ms(100);
+					}
+					sum = 0;
+					error_flag = false;
+				}				
+				
+				sprintf(str,"    %ld",sum);
+				lcd_putsf(0,1,(unsigned char*)str);
+				
 			}
 		}
 
 		else if(mode == TOTAL){
 			while(1){
-				unsigned int key = my_getkey();
+				//unsigned int key = my_getkey();
 				
 				lcd_putsf(0,0,(unsigned char*)"Total Sales     ");
+				sprintf(str,"= %ldwon",total_sale);
+				lcd_putsf(0,1,(unsigned char*)str);
 			}
 		}		
     }
