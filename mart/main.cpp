@@ -18,8 +18,8 @@
 unsigned int hour = 8, min = 0, sec = 0, end_time = 0;
 int mode = CLOCK;
 bool error_flag = false, change_flag = false, total_flag = true, endtime_flag = false, end_flag = false;
-long int sum = 0, total_sum = 0;
 char str[16] = {0,};
+long int sum = 0;
 	
 ISR(TIMER0_OVF_vect){
 	msec++;
@@ -60,7 +60,7 @@ int main(void)
 	
 	initSystem();
 	
-	long int total_sale = 0;
+	long int total_sale = 0, total_sum = 0;
     while (1) 
     {
 		if(mode == CLOCK){
